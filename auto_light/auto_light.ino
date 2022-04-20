@@ -47,7 +47,7 @@ int brightness = 10;  // Cường độ sáng của đèn led
 
 int temperature = 0;  // Giá trị nhiệt độ
 int humidity = 0;     // Giá trị độ ẩm
-int lux = 0;          // Giá trị cường độ ánh sáng
+long lux = 0;          // Giá trị cường độ ánh sáng
 
 long time = 0;
 bool check, checkBef = false;
@@ -94,13 +94,12 @@ void distanceCallback() {
 }
 
 void dhtCallback() {
-  int l = lightMeter.readLightLevel();
+  long l = lightMeter.readLightLevel();
 
   lcd.setCursor(7, 1);
-  lcd.print("        ");
+  lcd.print("      ");
   lcd.setCursor(7, 1);
   lcd.print(l);
-  lcd.print(" lux");
 
 
   int h = dht.readHumidity();
@@ -143,14 +142,18 @@ void dhtCallback() {
     lux = l;
     sendLuxValue(lux);
 
+    HC05.write(isLightOn ? LED_TURN_ON : LED_TURN_OFF);
+    HC05.write(isAutoLight ? LED_AUTO_LIGHT_ON : LED_AUTO_LIGHT_OFF);
+
     cmd = -1;
   }
 }
-
-void sendLuxValue(int lux) {
+// 65432
+void sendLuxValue(long lux) {
   HC05.write(SEND_LIGHT);
-  HC05.write(lux / 1000);
-  HC05.write(lux % 1000);
+  HC05.write(lux / 10000);
+  HC05.write((lux % 10000) / 100);
+  HC05.write((lux % 10000) % 100);
 }
 
 
@@ -228,6 +231,12 @@ void setup()
   lcd.setCursor(1, 0);
   lcd.print("Nhiet do: ");
 
+  lcd.setCursor(5, 1);
+  lcd.print(":");
+  
+  lcd.setCursor(12, 1);
+  lcd.print(" lux");
+
 
   lcd.createChar(1, degree);
 
@@ -238,14 +247,13 @@ void setup()
 
   distanceThread->setInterval(100);
   dhtThread->setInterval(1000);
-  ledThread->setInterval(10);
+  ledThread->setInterval(100);
   bluetoothThread->setInterval(10);
 }
 
 // ------- loop -------
 void loop() {
   controller.run();
-  delay(300);
 }
 
 void ledBrightness(int brightness) {

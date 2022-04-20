@@ -185,6 +185,10 @@ public class MainActivity extends AppCompatActivity {
                             binding.swTurnLed.setChecked(true);
                         } else if (mess.equalsIgnoreCase("LED_OFF")) {
                             binding.swTurnLed.setChecked(false);
+                        } else if (mess.equalsIgnoreCase("LED_AUTO_LIGHT_ON")) {
+                            binding.swAutoLight.setChecked(true);
+                        } else if (mess.equalsIgnoreCase("LED_AUTO_LIGHT_OFF")) {
+                            binding.swAutoLight.setChecked(false);
                         }
                         break;
                 }

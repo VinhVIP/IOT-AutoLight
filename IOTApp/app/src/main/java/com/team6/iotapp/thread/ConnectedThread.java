@@ -55,12 +55,10 @@ public class ConnectedThread extends Thread {
                             MainActivity.handler.obtainMessage(MESSAGE_READ, "H" + value).sendToTarget();
                             break;
                         case Configs.RECEIVE_LIGHT:
-                            value = inputStream.read();
                             String s = "";
-                            if (value > 0) s = value + "";
-
-                            value = inputStream.read();
-                            s += String.format("%03d", value);
+                            for (int i = 0; i < 3; i++) {
+                                s += String.format("%02d", inputStream.read());
+                            }
                             int light = Integer.parseInt(s);
 
                             MainActivity.handler.obtainMessage(MESSAGE_READ, "I" + light).sendToTarget();
@@ -70,6 +68,12 @@ public class ConnectedThread extends Thread {
                             break;
                         case Configs.LED_TURN_OFF:
                             MainActivity.handler.obtainMessage(MESSAGE_READ, "LED_OFF").sendToTarget();
+                            break;
+                        case Configs.LED_AUTO_LIGHT_ON:
+                            MainActivity.handler.obtainMessage(MESSAGE_READ, "LED_AUTO_LIGHT_ON").sendToTarget();
+                            break;
+                        case Configs.LED_AUTO_LIGHT_OFF:
+                            MainActivity.handler.obtainMessage(MESSAGE_READ, "LED_AUTO_LIGHT_OFF").sendToTarget();
                             break;
                         default:
                             break;
