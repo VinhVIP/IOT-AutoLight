@@ -55,13 +55,15 @@ public class ConnectedThread extends Thread {
                             MainActivity.handler.obtainMessage(MESSAGE_READ, "H" + value).sendToTarget();
                             break;
                         case Configs.RECEIVE_LIGHT:
-                            int length = inputStream.read();
+                            value = inputStream.read();
                             String s = "";
-                            while (length-- > 0) {
-                                value = inputStream.read();
-                                s = value + s;
-                            }
-                            MainActivity.handler.obtainMessage(MESSAGE_READ, "I" + s).sendToTarget();
+                            if (value > 0) s = value + "";
+
+                            value = inputStream.read();
+                            s += String.format("%03d", value);
+                            int light = Integer.parseInt(s);
+
+                            MainActivity.handler.obtainMessage(MESSAGE_READ, "I" + light).sendToTarget();
                             break;
                         case Configs.LED_TURN_ON:
                             MainActivity.handler.obtainMessage(MESSAGE_READ, "LED_ON").sendToTarget();
@@ -73,18 +75,6 @@ public class ConnectedThread extends Thread {
                             break;
                     }
                 }
-
-
-//                    buffer[bytes] = (byte) mmInStream.read();
-//                    String readMessage;
-//                    if (buffer[bytes] == '\n') {
-//                        readMessage = new String(buffer, 0, bytes);
-//                        Log.d("Arduino Message", readMessage);
-//                        handler.obtainMessage(MESSAGE_READ, readMessage).sendToTarget();
-//                        bytes = 0;
-//                    } else {
-//                        bytes++;
-//                    }
             } catch (IOException e) {
                 e.printStackTrace();
                 break;
