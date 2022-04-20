@@ -13,9 +13,6 @@ const int LED_PIN = 9;
 const int TX_PIN = 2;
 const int RX_PIN = 3;
 
-// ---------- Cảm biến ánh sáng -------------------
-const int LIGHT_SENSOR_PIN = 0;
-
 // ---------- Cảm biến siêu âm HC-SR04 -------------------
 const int TRIG_PIN = 8;
 const int ECHO_PIN = 7;
@@ -27,7 +24,7 @@ const int DHTTYPE = DHT11;
 
 
 // ---------- Các hằng số ----------------------
-const int DELAY_TIME = 100;  // Thời gian delay chính của chương trình
+const int DELAY_TIME = 1000;  // Thời gian delay cảm biến siêu âm (vật cản)
 
 const int INIT = 1;
 
@@ -55,13 +52,13 @@ int lux = 0;          // Giá trị cường độ ánh sáng
 long time = 0;
 bool check, checkBef = false;
 
-int maxLux = 600, minBri = 30, maxBri = 90;
+int maxLux = 600, minBri = 30, maxBri = 80, maxDistance = 30;
 
 byte degree[8] = {0B01110, 0B01010, 0B01110, 0B00000, 0B00000, 0B00000, 0B00000, 0B00000};
 
 
 BH1750 lightMeter;
-SoftwareSerial HC05(RX_PIN, TX_PIN);
+SoftwareSerial HC05(TX_PIN, RX_PIN);
 DHT dht(DHTPIN, DHTTYPE);
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
@@ -80,14 +77,14 @@ void distanceCallback() {
 
   distanceCm = duration / 29.1 / 2;
 
-  if (distanceCm > 30) {
+  if (distanceCm > maxDistance) {
     time = 0;
     check = checkBef = false;
   } else {
     Serial.println(time);
     check = true;
 
-    if (millis() - time >= 1000 && !checkBef) {
+    if (millis() - time >= DELAY_TIME && !checkBef) {
       isLightOn = !isLightOn;
       HC05.write(isLightOn ? LED_TURN_ON : LED_TURN_OFF);
 
@@ -151,30 +148,17 @@ void dhtCallback() {
 }
 
 void sendLuxValue(int lux) {
-  int value = lux;
-  int cnt = 0;
-  while (value > 0) {
-    cnt++;
-    value /= 10;
-  }
   HC05.write(SEND_LIGHT);
-  HC05.write(cnt);
-  while (lux > 0) {
-    HC05.write(lux % 10);
-    lux /= 10;
-  }
+  HC05.write(lux / 1000);
+  HC05.write(lux % 1000);
 }
 
-// 0:   80%
-// 600: 30%
 
 void ledCallback() {
   if (isLightOn) {
     if (isAutoLight) {
       if (lux <= maxLux) {
         int value = maxBri - lux / (maxLux / (maxBri - minBri));
-        Serial.print("value: ");
-        Serial.print(value);
         ledBrightness(value);
       } else {
         isLightOn = !isLightOn;
@@ -248,8 +232,8 @@ void setup()
   lcd.createChar(1, degree);
 
   HC05.begin(9600);
-  pinMode(RX_PIN, INPUT);
-  pinMode(TX_PIN, OUTPUT);
+  pinMode(RX_PIN, OUTPUT);
+  pinMode(TX_PIN, INPUT);
 
 
   distanceThread->setInterval(100);
@@ -261,7 +245,7 @@ void setup()
 // ------- loop -------
 void loop() {
   controller.run();
-  delay(100);
+  delay(300);
 }
 
 void ledBrightness(int brightness) {
