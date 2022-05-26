@@ -75,6 +75,7 @@ void distanceCallback() {
 
   duration = pulseIn(ECHO_PIN, HIGH);
 
+  // Giá trị khoảng cách
   distanceCm = duration / 29.1 / 2;
 
   if (distanceCm > maxDistance) {
@@ -96,36 +97,23 @@ void distanceCallback() {
 void dhtCallback() {
   long l = lightMeter.readLightLevel();
 
-  lcd.setCursor(8, 0);
-  lcd.print("        ");
+  lcd.setCursor(7, 1);
+  lcd.print("      ");
+  lcd.setCursor(7, 1);
+  lcd.print(l);
 
-  if(l < 1000){
-    lcd.setCursor(9, 0);
-    lcd.print(l);
-    lcd.print(" LUX");
-  }else{
-    lcd.setCursor(8, 0);
-    lcd.print(l);
-
-    lcd.setCursor(13, 0);
-    lcd.print("LUX");
-  }
 
   int h = dht.readHumidity();
   int t = dht.readTemperature();
 
-  lcd.setCursor(3, 1);
-  lcd.print("  ");
-  lcd.setCursor(3, 1);
+  lcd.setCursor(11, 0);
   lcd.print(t);
-  lcd.setCursor(5, 1);
   lcd.write(1);
   lcd.print("C");
 
-  lcd.setCursor(12, 1);
+  lcd.setCursor(1, 1);
   lcd.print(h);
   lcd.print("%");
- 
 
   if (l != lux) {
     lux = l;
@@ -161,8 +149,7 @@ void dhtCallback() {
     cmd = -1;
   }
 }
-
-
+// 65432
 void sendLuxValue(long lux) {
   HC05.write(SEND_LIGHT);
   HC05.write(lux / 10000);
@@ -242,14 +229,15 @@ void setup()
   lcd.init();
   lcd.backlight();
 
-  lcd.setCursor(0, 0);
-  lcd.print("DO SANG:");
+  lcd.setCursor(1, 0);
+  lcd.print("Nhiet do: ");
 
-  lcd.setCursor(0, 1);
-  lcd.print("T:");
+  lcd.setCursor(5, 1);
+  lcd.print(":");
 
-  lcd.setCursor(9, 1);
-  lcd.print("H:");
+  lcd.setCursor(12, 1);
+  lcd.print(" lux");
+
 
   lcd.createChar(1, degree);
 
